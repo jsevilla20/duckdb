@@ -4,13 +4,9 @@ const duckdb = require('duckdb');
 const uri = "mongodb+srv://DP_mongopython:yV0qDTUeZOebABy9@cluster0.2xxit.mongodb.net/";
 const client = new MongoClient(uri);
 
-async function run(csvData) {
-    
-}
-
 const db = new duckdb.Database(':memory:', {
     "access_mode": "READ_WRITE",
-    "max_memory": "1024MB",
+    "max_memory": "2048MB",
     "threads": "4"
 }, (err) => {
   if (err) {
@@ -19,16 +15,16 @@ const db = new duckdb.Database(':memory:', {
 });
 
 //Importamos el CSV de Employees
-"id";"firstname";"lastname";"email";"birth";"job";"vehicle";"model";"phone"
-"1";"Marcella";"Schuppe";"Marcella21@gmail.com";"28/09/2024";"Global Markets Producer";"Polestar";"Impala";"677241141"
-db.all("CREATE TABLE Employees FROM read_csv('Employees1.csv', types = {'id': 'INTEGER', 'firstname': 'VARCHAR', 'lastname': 'VARCHAR', 'email': 'VARCHAR', 'birth': 'DATETIME', 'job': 'VARCHAR', 'vehicle': 'VARCHAR', 'model': 'VARCHAR', 'phone': 'VARCHAR'});", function(err, res) {
-    if (err) {
-      console.log('Error al importar Employees');
-      console.warn(err);
-      return;
-    }else{
-      console.log("Tabla Employees creada correctamente")
-    }
+
+db.all("CREATE TABLE Employees AS FROM read_csv('files/Employees.csv', header = true);", function(err, res) {
+  if (err) {
+    console.log('Error al importar Employees');
+    console.warn(err);
+    return;
+  }else{
+    console.log("Tabla Employees creada correctamente")
+    console.log(res.length);
+  }
 });
 
 //Importamos el CSV de Salarios
@@ -40,30 +36,34 @@ db.all("CREATE TABLE Salary AS FROM read_csv('files/Salary.csv', header = true);
     return;
   }else{
     console.log("Tabla Salary creada correctamente")
+    console.log(res.length);
   }
-  
 });
 
 //Cruzamos las dos tablas
 
-db.all("SELECT * FROM Employees as a, Salary as b where a.job = b.job", function(err, res) {
+db.all("SELECT A.id, A.firstname, A.email, A.birth, A.job, A.vehicle, A.model, A.phone, B.salary FROM Employees A LEFT JOIN Salary B ON A.job = B.job", function(err, res) {
   if (err) {
       console.log('Error al cruzar');
       console.warn(err);
       return;
-  }
-
-  try {
-    console.log('Entramos a cargar el csv');
-    const database = client.db('test_python');
-    const coll = database.collection('test_duckdb');
-    coll.deleteMany();
-    coll.insertMany(res);
-    
-    console.log('Terminó la carga');
-  } finally {
-  // Ensures that the client will close when you finish/error
-  client.close();
-  console.log('Cerramos conexión');
+  }else{
+    console.log(res.length)
+    try {
+      console.log('Entramos a cargar los datos');
+      const database = client.db('test_python');
+      const coll = database.collection('test_duckdb');
+      coll.deleteMany();
+      coll.insertMany(res);
+      console.log('Terminó la carga');
+      }
+    finally {
+    // Ensures that the client will close when you finish/error
+    console.log('Cerramos conexión');
+    client.close();
+    }
   }
 });
+
+console.log("Vamos a cerrar la BBDD");
+db.close();
