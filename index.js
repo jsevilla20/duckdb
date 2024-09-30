@@ -29,7 +29,7 @@ db.all("CREATE TABLE Employees AS FROM read_csv('files/Employees.csv', header = 
 
 //Importamos el CSV de Salarios
 
-db.all("CREATE TABLE Salary AS FROM read_csv('files/Salary.csv', header = true);", function(err, res) {
+db.all("CREATE TABLE Salary AS SELECT job, max(salary) salary FROM read_csv('files/Salary.csv', header = true) GROUP BY job;", function(err, res) {
   if (err) {
     console.log('Error al importar Salary');
     console.warn(err);
