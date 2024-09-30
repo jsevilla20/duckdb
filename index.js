@@ -19,8 +19,9 @@ const db = new duckdb.Database(':memory:', {
 });
 
 //Importamos el CSV de Employees
-
-db.all("CREATE TABLE Employees AS FROM read_csv('files/Employees1.csv', header = true);", function(err, res) {
+"id";"firstname";"lastname";"email";"birth";"job";"vehicle";"model";"phone"
+"1";"Marcella";"Schuppe";"Marcella21@gmail.com";"28/09/2024";"Global Markets Producer";"Polestar";"Impala";"677241141"
+db.all("CREATE TABLE Employees FROM read_csv('Employees1.csv', types = {'id': 'INTEGER', 'firstname': 'VARCHAR', 'lastname': 'VARCHAR', 'email': 'VARCHAR', 'birth': 'DATETIME', 'job': 'VARCHAR', 'vehicle': 'VARCHAR', 'model': 'VARCHAR', 'phone': 'VARCHAR'});", function(err, res) {
     if (err) {
       console.log('Error al importar Employees');
       console.warn(err);
@@ -65,6 +66,4 @@ db.all("SELECT * FROM Employees as a, Salary as b where a.job = b.job", function
   client.close();
   console.log('Cerramos conexión');
   }
-
 });
-
