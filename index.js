@@ -4,6 +4,12 @@ const duckdb = require('duckdb');
 const uri = "mongodb+srv://DP_mongopython:yV0qDTUeZOebABy9@cluster0.2xxit.mongodb.net/";
 const client = new MongoClient(uri);
 
+let fechainicio = new Date();
+
+console.log("################ INCIO ##################");
+console.log("    ", fechainicio.toLocaleDateString(), "-", fechainicio.toLocaleTimeString());
+console.log("#########################################");
+
 const db = new duckdb.Database(':memory:', {
     "access_mode": "READ_WRITE",
     "max_memory": "2048MB",
@@ -23,7 +29,6 @@ db.all("CREATE TABLE Employees AS FROM read_csv('files/Employees.csv', header = 
     return;
   }else{
     console.log("Tabla Employees creada correctamente")
-    console.log(res.length);
   }
 });
 
@@ -36,7 +41,6 @@ db.all("CREATE TABLE Salary AS SELECT job, max(salary) salary FROM read_csv('fil
     return;
   }else{
     console.log("Tabla Salary creada correctamente")
-    console.log(res.length);
   }
 });
 
@@ -48,23 +52,12 @@ db.all("SELECT A.id, A.firstname, A.email, A.birth, A.job, A.vehicle, A.model, A
       console.warn(err);
       return;
   }else{
-    console.log(res.length)
     try {
-      console.log('Entramos a cargar los datos');
+      console.log('Entramos a cargar los datos: ', res.length);
       const database = client.db('test_python');
       const coll = database.collection('test_duckdb');
-      // coll.deleteMany().then(()=>{
-      //   coll.insertMany(res).then(()=>{
-   
-      //   }).catch(error =>{
-      //     console.error(error);
-      //   });
-      // }).catch(error=>{
-      //   console.error(error);
-      // }).finally(()=>{
-      // });
       await coll.deleteMany();
-      await coll.insertMany(res);  
+      await coll.insertMany(res);
     }catch(error){
       console.error(error);
     }
@@ -74,6 +67,12 @@ db.all("SELECT A.id, A.firstname, A.email, A.birth, A.job, A.vehicle, A.model, A
       client.close();
       console.log("Vamos a cerrar la BBDD");
       db.close();
+      let fechafin = new Date();
+      console.log("################## FIN ##################");
+      console.log("    ", fechafin.toLocaleDateString(), "-", fechafin.toLocaleTimeString());
+      console.log("#########################################");
+      tiempoentrefechas = (fechafin.getTime() - fechainicio.getTime())/1000;
+      console.log("Duración: ",tiempoentrefechas, " segundos");
     }
   }
 });
